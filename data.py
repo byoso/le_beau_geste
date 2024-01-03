@@ -15,7 +15,7 @@ DATA_FILE = os.path.join(BASE_DIR, "data.json")
 
 class Data:
     def __init__(self):
-        """initialize the data file if it doesn't exist"""
+        """Abstraction to manipulate data stored in a json file"""
         if not os.path.exists(DATA_FILE):
             with open(DATA_FILE, "w") as file:
                 json.dump(
@@ -44,21 +44,19 @@ class Data:
             self.data["folders"].append(folder)
         else:
             self.data["folders"].insert(0, folder)
-        self.save()
+        self.__save()
 
     def delete_folder(self, folder_id):
-        """delete a folder from the list"""
         for folder in self.data["folders"]:
             if folder["id"] == folder_id:
                 self.data["folders"].remove(folder)
-        self.save()
+        self.__save()
 
     def rename_folder(self, folder_id, new_name):
-        """rename a folder"""
         for folder in self.data["folders"]:
             if folder["id"] == folder_id:
                 folder["name"] = new_name
-        self.save()
+        self.__save()
 
     def get_data(self):
         """get data from json file"""
@@ -67,8 +65,12 @@ class Data:
             data["folders"].sort(key=lambda x: x["name"])
         return data
 
-    def save(self):
+    def __save(self):
         """save data to json file"""
-        print('saving data:', self.data)
+        # print('saving data:', self.data)
+        self.data["folders"].sort(key=lambda x: x["name"])
         with open(DATA_FILE, "w") as file:
             json.dump(self.data, file, indent=2)
+
+
+data = Data()

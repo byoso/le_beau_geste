@@ -1,24 +1,16 @@
 
 import subprocess
 import os
+
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk, GObject
 
-from data import Data
+from data import data
+from helpers.utils import open_folder
 
-data = Data()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-provider = Gtk.CssProvider()
-provider.load_from_path(os.path.join(BASE_DIR, "style.css"))
-Gtk.StyleContext().add_provider_for_screen(
-    Gdk.Screen.get_default(),
-    provider,
-    Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-    )
-
 
 class IconMenuItem(Gtk.MenuItem):
     """Replaces Gtk.ImageMenuItem which is deprecated"""
@@ -42,7 +34,7 @@ class FolderItem(Gtk.Grid):
         super().__init__()
         self.folder = folder
 
-        self.input = Gtk.Entry(max_length=24, text=folder["name"])
+        self.input = Gtk.Entry(max_length=64, text=folder["name"])
 
         btn_save = Gtk.Button(label="Save", tooltip_text="Save name")
         btn_save.connect("clicked", self.save)
@@ -65,12 +57,47 @@ class FolderItem(Gtk.Grid):
 
     def delete(self, widget):
         data.delete_folder(self.folder["id"])
+        self.emit("update_folders")
         self.destroy()
 
     def save(self, widget):
         self.folder["name"] = self.input.get_text()
         data.rename_folder(self.folder["id"], self.folder["name"])
-        os.system("notify-send 'New name saved'")
+        self.emit("send_notification", object(), f"Name '{self.folder['name']}' saved", "notif-success")
+        self.emit("update_folders")
 
     def open(self, widget):
-        subprocess.Popen(["xdg-open", self.folder["path"]])
+        opening = open_folder(self.folder["path"])
+        if not opening:
+            self.emit("send_notification", object(), f"No folder found for '{self.folder['name']}'", "notif-danger")
+
+    @GObject.Signal()
+    def update_folders(self):
+        pass
+
+    @GObject.Signal(flags=GObject.SignalFlags.RUN_LAST, return_type=bool,
+                    arg_types=(object, str, str),
+                    accumulator=GObject.signal_accumulator_true_handled)
+    def send_notification(self, obj, message, type):
+        pass
+
+
+class Notification(Gtk.Button):
+    def __init__(self, message="Notification", type="info"):
+        super().__init__(label=message)
+        self.connect("clicked", self.close)
+        self.get_style_context().add_class(type)
+        self.show_all()
+
+    def close(self, widget):
+        # self.hide()
+        self.destroy()
+
+    def set(self, label, type="info"):
+        self.set_label(label)
+        self.get_style_context().remove_class("notif-success")
+        self.get_style_context().remove_class("notif-danger")
+        self.get_style_context().remove_class("notif-info")
+        self.get_style_context().remove_class("notif-warning")
+        self.get_style_context().add_class(type)
+        self.show_all()

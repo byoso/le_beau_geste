@@ -4,11 +4,11 @@ import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk as gtk
 
-from helpers.widgets import FolderItem
-from data import Data
+from helpers.widgets import FolderItem, Notification
+from data import data
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-data = Data()
+data = data
 
 class FoldersWindow(gtk.Window):
     """Basic gtk window"""
@@ -29,7 +29,7 @@ class FoldersWindow(gtk.Window):
 
         # Items
 
-        button_1 = gtk.Button(label="+ Add a folder")
+        button_1 = gtk.Button(label="+ Add a collection")
         button_1.connect("clicked", self.on_folder_clicked)
         self.box.pack_start(button_1, False, True, 0)
 
@@ -38,16 +38,25 @@ class FoldersWindow(gtk.Window):
 
         self.folders = self.show_folders()
 
-    def show_folders(self):
+    def show_folders(self, *args):
         """show folders"""
         self.folders_box.destroy()
         self.folders_box = gtk.VBox()
         for folder in data["folders"]:
-            print(folder)
+            # print(folder)
             folder_item = FolderItem(folder)
+            folder_item.connect("update_folders", self.show_folders)
+            folder_item.connect("send_notification", self.add_notification)
             self.folders_box.pack_start(folder_item, False, True, 0)
         self.box.pack_start(self.folders_box, False, True, 0)
         self.show_all()
+
+
+    def add_notification(self, source, obj, message, type):
+        if hasattr(self, "notification"):
+            self.notification.destroy()
+        self.notification = Notification(message, type)
+        self.box.pack_end(self.notification, False, True, 0)
 
 
     # callbacks
