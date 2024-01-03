@@ -61,7 +61,7 @@ class FolderItem(Gtk.Grid):
         self.destroy()
 
     def save(self, widget):
-        self.folder["name"] = self.input.get_text()
+        self.folder["name"] = self.input.get_text().strip()
         data.rename_folder(self.folder["id"], self.folder["name"])
         self.emit("send_notification", object(), f"Name '{self.folder['name']}' saved", "notif-success")
         self.emit("update_folders")

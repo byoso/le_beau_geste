@@ -20,6 +20,7 @@ class Data:
             with open(DATA_FILE, "w") as file:
                 json.dump(
                     {   "timer": 60,
+                        "last_collection": None,
                         "folders": []
                     },
                     file,
@@ -34,29 +35,40 @@ class Data:
         """get an item from the data"""
         return self.data[key]
 
+    def __setitem__(self, key: str, value: Any) -> None:
+        """set an item to the data"""
+        self.data[key] = value
+        self.save()
+
     def add_folder(self, folder_name=None, folder_path=""):
         """add a folder to the list"""
         id = str(uuid.uuid4())
         if folder_name is None:
-            folder_name = f"_ Unitled collection- {id[:4]}"
+            folder_name = f"000 Untitled collection - {id[:4]}"
         folder = {"name": folder_name, "path": folder_path, "id": id}
         if len(self.data["folders"]) == 0:
             self.data["folders"].append(folder)
         else:
             self.data["folders"].insert(0, folder)
-        self.__save()
+        self.save()
 
     def delete_folder(self, folder_id):
         for folder in self.data["folders"]:
             if folder["id"] == folder_id:
                 self.data["folders"].remove(folder)
-        self.__save()
+        self.save()
+
+    def get_folder(self, folder_id):
+        for folder in self.data["folders"]:
+            if folder["id"] == folder_id:
+                return folder
+        return None
 
     def rename_folder(self, folder_id, new_name):
         for folder in self.data["folders"]:
             if folder["id"] == folder_id:
                 folder["name"] = new_name
-        self.__save()
+        self.save()
 
     def get_data(self):
         """get data from json file"""
@@ -65,7 +77,7 @@ class Data:
             data["folders"].sort(key=lambda x: x["name"])
         return data
 
-    def __save(self):
+    def save(self):
         """save data to json file"""
         # print('saving data:', self.data)
         self.data["folders"].sort(key=lambda x: x["name"])
