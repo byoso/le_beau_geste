@@ -2,9 +2,13 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GObject
 
+# import sys
+
 from data import data
 from helpers.folders_window import FoldersWindow
+# import faulthandler
 
+# faulthandler.dump_traceback(file=sys.stderr, all_threads=True)
 
 class MainInterface(Gtk.Grid):
     def __init__(self):
@@ -17,6 +21,7 @@ class MainInterface(Gtk.Grid):
         self.set_hexpand(False)
         self.set_vexpand(False)
         self.width = 600
+
 
         # Items
         # + collections
@@ -37,22 +42,27 @@ class MainInterface(Gtk.Grid):
         self.timer_button.connect("clicked", self.save_timer)
         self.timer_button.set_hexpand(False)
         self.attach(self.timer_button, 0, 1, 3, 1)
-        self.timer = Gtk.SpinButton.new_with_range(30, 1200, 30)
+        self.timer = Gtk.SpinButton.new_with_range(1, 1200, 30)
         self.timer.set_value(int(data["timer"]))
         self.set_timer_button()
         self.timer.connect("value-changed", self.timer_changed)
         self.attach(self.timer, 3, 1, 1, 1)
 
         # GO !
-        self.go_button = Gtk.Button(label="GO !", tooltip_text="Click to start the timer")
-        self.go_button.get_style_context().add_class("success")
-        self.attach(self.go_button, 4, 1, 1, 1)
+        self.btn_go = Gtk.Button(label="GO !", tooltip_text="Click to start the timer")
+        self.btn_go.get_style_context().add_class("success")
+        self.attach(self.btn_go, 4, 1, 1, 1)
 
         # previous /next
         self.btn_previous = Gtk.Button(label="< Previous")
         self.attach(self.btn_previous, 5, 1, 1, 1)
+        self.lbl_image_count = Gtk.Label(label="0/0")
+        self.attach(self.lbl_image_count, 6, 1, 1, 1)
         self.btn_next = Gtk.Button(label="Next >")
-        self.attach(self.btn_next, 6, 1, 1, 1)
+        self.attach(self.btn_next, 7, 1, 1, 1)
+
+    def set_image_count(self, index=0, images=0):
+        self.lbl_image_count.set_label(f"{index + 1}/{images}")
 
     # callbacks
     def save_timer(self, widget):
@@ -72,14 +82,21 @@ class MainInterface(Gtk.Grid):
         window.show_all()
 
     def refresh_combo(self, *args):
-        if hasattr(self, "collection_store"):
+        if hasattr(self, "collection_store") and hasattr(self, "my_folders"):
             self.collection_store.clear()
-        if hasattr(self, "my_folders"):
-            self.my_folders.destroy()
+            self.collection_store.append(["0", "-- Select a collection --", ""])
+            for folder in data["folders"]:
+                self.collection_store.append([folder["id"], folder["name"], folder["path"]])
+            self.my_folders.set_model(self.collection_store)
+            self.my_folders.set_active(0)
+            self.show_all()
+            return
+
         self.collection_store = Gtk.ListStore(str, str, str)
         self.collection_store.append(["0", "-- Select a collection --", ""])
         for folder in data["folders"]:
             self.collection_store.append([folder["id"], folder["name"], folder["path"]])
+
         self.my_folders = Gtk.ComboBox.new_with_model(self.collection_store)
         self.my_folders.set_entry_text_column(0)
         self.my_folders.set_active(0)
