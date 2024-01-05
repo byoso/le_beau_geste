@@ -1,4 +1,4 @@
-# Le Beau Geste
+# Le Beau Geste (Beta)
 
 
 This application is for the artists who want to train for gesture quick drawings.

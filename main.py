@@ -47,6 +47,13 @@ class MainWindow(Gtk.Window):
         # connect the quit button of the window
         self.connect("delete-event", Gtk.main_quit)
 
+
+        # initialize some values
+        self.images = []
+        self.running = False
+        self.waiting = None
+
+
         self.image_index = 0
         try:
             if os.path.exists(data["last_collection"]["path"]):
@@ -64,8 +71,6 @@ class MainWindow(Gtk.Window):
         self.interface_grid.btn_go.connect("clicked", self.running_changed)
         self.interface_box.pack_start(self.interface_grid, False, True, 0)
 
-        self.running = False
-        self.waiting = None
         self.timer = self.get_timer()
 
         self.display()
@@ -110,13 +115,24 @@ class MainWindow(Gtk.Window):
         self.cycle()
 
     def collection_changed(self, *args):
+
+        print("collection_changed")
+        if data["last_collection"] is None:
+            self.images = []
+            return
         self.image_index = 0
         try:
             if os.path.exists(data["last_collection"]["path"]):
                 self.images = get_images(data["last_collection"]["path"])
+                print("collection successfully changed")
         except TypeError:
             self.images = []
-        self.display()
+            print("Error in collection_changed")
+            return
+        if len(self.images) > 0:
+            self.display()
+        else:
+            self.interface_grid.refresh_combo()
 
     def set_image_count_label(self, index, images):
         self.interface_grid.set_image_count(index, images)
@@ -147,11 +163,11 @@ class MainWindow(Gtk.Window):
                     height=fitting_size.height,
                     preserve_aspect_ratio=True
                     )
+
             self.image.set_from_pixbuf(image)
-            # self.image.set_from_file(self.images[self.image_index])
 
         elif self.images:
-            # self.image = Gtk.Image.new_from_file(self.images[self.image_index])
+            # try:
             image = GdkPixbuf.Pixbuf.new_from_file_at_scale(
                 self.images[self.image_index],
                 width=fitting_size.width,

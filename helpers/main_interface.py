@@ -1,3 +1,5 @@
+import os
+
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GObject
@@ -29,8 +31,6 @@ class MainInterface(Gtk.Grid):
         btn_folders.connect("clicked", self.open_folders_window)
         self.attach(btn_folders, 0, 0, 1, 1)
 
-        # my collections
-        self.refresh_combo()
 
         # refresh
         self.btn_refresh = Gtk.Button(label="Refresh", tooltip_text="Refresh the list")
@@ -65,6 +65,9 @@ class MainInterface(Gtk.Grid):
         self.lbl_remaining_time = Gtk.Label(label="ready...")
         self.attach(self.lbl_remaining_time, 8, 1, 1, 1)
 
+        # my collections
+        self.refresh_combo()
+
     def set_image_count(self, index=0, images=0):
         self.lbl_image_count.set_label(f"{index + 1}/{images}")
 
@@ -90,7 +93,10 @@ class MainInterface(Gtk.Grid):
             self.collection_store.clear()
             self.collection_store.append(["0", "-- Select a collection --", ""])
             for folder in data["folders"]:
-                self.collection_store.append([folder["id"], folder["name"], folder["path"]])
+                if os.path.exists(folder["path"]):
+                    self.collection_store.append([folder["id"], folder["name"], folder["path"]])
+                else:
+                    data.delete_folder(folder["id"])
             self.my_folders.set_model(self.collection_store)
             self.my_folders.set_active(0)
             self.show_all()
@@ -99,7 +105,10 @@ class MainInterface(Gtk.Grid):
         self.collection_store = Gtk.ListStore(str, str, str)
         self.collection_store.append(["0", "-- Select a collection --", ""])
         for folder in data["folders"]:
-            self.collection_store.append([folder["id"], folder["name"], folder["path"]])
+            if os.path.exists(folder["path"]):
+                self.collection_store.append([folder["id"], folder["name"], folder["path"]])
+            else:
+                data.delete_folder(folder["id"])
 
         self.my_folders = Gtk.ComboBox.new_with_model(self.collection_store)
         self.my_folders.set_entry_text_column(0)
