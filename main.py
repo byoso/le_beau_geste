@@ -24,16 +24,12 @@ class MainWindow(Gtk.Window):
         # Basic construction
         super().__init__(title=f"le beau geste ({config.VERSION})")
         self.set_size_request(1000, 600)
-        self.set_default_icon_from_file(os.path.join(BASE_DIR, "helpers", "icon.png"))
+        self.set_default_icon_from_file(os.path.join(BASE_DIR, "helpers", "icon_trans_le_beau_geste.png"))
         self.set_position(Gtk.WindowPosition.CENTER)
         self.current_collection = None
         self.scroll = Gtk.ScrolledWindow()
         self.main_box = Gtk.VBox()
         self.add(self.main_box)
-
-        self.running = False
-        self.waiting = None
-        self.timer = None
 
         self.interface_box = Gtk.VBox()
         self.display_box = Gtk.VBox()
@@ -68,26 +64,44 @@ class MainWindow(Gtk.Window):
         self.interface_grid.btn_go.connect("clicked", self.running_changed)
         self.interface_box.pack_start(self.interface_grid, False, True, 0)
 
+        self.running = False
+        self.waiting = None
+        self.timer = self.get_timer()
 
         self.display()
+
+    def get_timer(self):
+        return self.interface_grid.timer.get_value_as_int()
+
+    def set_remaining_time(self, label=None):
+        if label is not None:
+            value = label
+        else:
+            minutes = int(self.timer / 60)
+            seconds = self.timer % 60
+            value = f"{minutes}m {seconds}s"
+        self.interface_grid.lbl_remaining_time.set_label(f"remaining time: {value}")
 
     def running_changed(self, *args):
         self.running = not self.running
         if self.running:
-            self.timer = data["timer"]
+            self.interface_grid.btn_go.set_label("STOP")
+            self.timer = self.get_timer()
             self.cycle()
         else:
             self.interface_grid.btn_go.set_label("GO !")
             if self.waiting is not None:
                 self.waiting.join()
-            self.timer = 0
+            self.timer = self.get_timer()
+            self.set_remaining_time()
             self.waiting = None
 
     def cycle(self):
         if self.running:
+            self.set_remaining_time()
             if self.timer == 0:
                 self.next()
-                self.timer = data["timer"]
+                self.timer = self.get_timer()
             self.waiting = Thread(target=self.wait_for_timer, daemon=True).start()
 
     def wait_for_timer(self):

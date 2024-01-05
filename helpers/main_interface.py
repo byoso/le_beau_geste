@@ -49,7 +49,7 @@ class MainInterface(Gtk.Grid):
         self.attach(self.timer, 3, 1, 1, 1)
 
         # GO !
-        self.btn_go = Gtk.Button(label="GO !", tooltip_text="Click to start the timer")
+        self.btn_go = Gtk.Button(label="GO !", tooltip_text="start / stop the timer")
         self.btn_go.get_style_context().add_class("success")
         self.attach(self.btn_go, 4, 1, 1, 1)
 
@@ -60,6 +60,10 @@ class MainInterface(Gtk.Grid):
         self.attach(self.lbl_image_count, 6, 1, 1, 1)
         self.btn_next = Gtk.Button(label="Next >")
         self.attach(self.btn_next, 7, 1, 1, 1)
+
+        # remaining time
+        self.lbl_remaining_time = Gtk.Label(label="ready...")
+        self.attach(self.lbl_remaining_time, 8, 1, 1, 1)
 
     def set_image_count(self, index=0, images=0):
         self.lbl_image_count.set_label(f"{index + 1}/{images}")

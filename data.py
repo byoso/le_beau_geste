@@ -44,7 +44,7 @@ class Data:
         """add a folder to the list"""
         id = str(uuid.uuid4())
         if folder_name is None:
-            folder_name = f"000 Untitled collection - {id[:4]}"
+            folder_name = folder_path.split("/")[-1]
         folder = {"name": folder_name, "path": folder_path, "id": id}
         if len(self.data["folders"]) == 0:
             self.data["folders"].append(folder)
@@ -79,7 +79,6 @@ class Data:
 
     def save(self):
         """save data to json file"""
-        # print('saving data:', self.data)
         self.data["folders"].sort(key=lambda x: x["name"])
         with open(DATA_FILE, "w") as file:
             json.dump(self.data, file, indent=2)

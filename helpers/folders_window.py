@@ -16,7 +16,7 @@ class FoldersWindow(gtk.Window):
         # Basic construction
         super().__init__()
         self.set_size_request(800, 300)
-        self.set_default_icon_from_file(os.path.join(BASE_DIR, "icon.png"))
+        self.set_default_icon_from_file(os.path.join(BASE_DIR, "icon_trans_le_beau_geste.png"))
         self.set_position(gtk.WindowPosition.CENTER)
         scroll = gtk.ScrolledWindow()
         self.add(scroll)
