@@ -50,6 +50,7 @@ class MainWindow(Gtk.Window):
 
         # initialize some values
         self.images = []
+        self.image = None
         self.running = False
         self.waiting = None
 
@@ -94,9 +95,9 @@ class MainWindow(Gtk.Window):
             self.timer = self.get_timer()
             self.cycle()
         else:
-            self.interface_grid.btn_go.set_label("GO !")
             if self.waiting is not None:
                 self.waiting.join()
+            self.interface_grid.btn_go.set_label("GO !")
             self.timer = self.get_timer()
             self.set_remaining_time()
             self.waiting = None
@@ -116,18 +117,16 @@ class MainWindow(Gtk.Window):
 
     def collection_changed(self, *args):
 
-        print("collection_changed")
         if data["last_collection"] is None:
+            self.interface_grid.set_image_count(0, 0)
             self.images = []
             return
         self.image_index = 0
         try:
             if os.path.exists(data["last_collection"]["path"]):
                 self.images = get_images(data["last_collection"]["path"])
-                print("collection successfully changed")
         except TypeError:
             self.images = []
-            print("Error in collection_changed")
             return
         if len(self.images) > 0:
             self.display()
@@ -140,34 +139,27 @@ class MainWindow(Gtk.Window):
     def display(self, *args):
         """display the images of a folder"""
 
+        if self.interface_grid.my_folders.get_active() == 0 or not self.images:
+            self.image_index = 0
+            return
+
         fitting_size = type("Empty_class", (object,), {})
         fitting_size.width, fitting_size.height = self.get_size().width, self.get_size().height - 100
 
         self.interface_grid.set_image_count(self.image_index, len(self.images))
-        if self.interface_grid.my_folders.get_active() == 0:
-            return
 
-        if hasattr(self, "image"):
-            try:
-                image = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-                    self.images[self.image_index],
-                    width=fitting_size.width,
-                    height=fitting_size.height,
-                    preserve_aspect_ratio=True
-                    )
-            except IndexError:
-                self.image_index = 0
-                image = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-                    self.images[self.image_index],
-                    width=fitting_size.width,
-                    height=fitting_size.height,
-                    preserve_aspect_ratio=True
-                    )
-
-            self.image.set_from_pixbuf(image)
-
-        elif self.images:
-            # try:
+        if self.image is None:
+            self.image = Gtk.Image()
+            self.box.pack_start(self.image, False, True, 0)
+        try:
+            image = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+                self.images[self.image_index],
+                width=fitting_size.width,
+                height=fitting_size.height,
+                preserve_aspect_ratio=True
+                )
+        except IndexError:
+            self.image_index = 0
             image = GdkPixbuf.Pixbuf.new_from_file_at_scale(
                 self.images[self.image_index],
                 width=fitting_size.width,
@@ -175,8 +167,8 @@ class MainWindow(Gtk.Window):
                 preserve_aspect_ratio=True
                 )
 
-            self.image = Gtk.Image.new_from_pixbuf(image)
-            self.box.pack_start(self.image, False, True, 0)
+        self.image.set_from_pixbuf(image)
+        self.box.show_all()
 
     def previous(self, *args):
         """display the previous image"""
