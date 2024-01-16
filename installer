@@ -32,7 +32,7 @@ DESCRIPTION = "Gesture training for the artists"
 EXECUTABLE = "main.py"
 # The icon that your system will use (optionnal, but so much better)
 # The path is relative to this directory (BASE_DIR defined below)
-ICON = "helpers/icon_trans_le_beau_geste.png"
+ICON = "app/interface/icon_trans_le_beau_geste.png"
 # Does your application needs to appear within a terminal ?
 # (usually, a graphical application doesn't need a terminal)
 TERMINAL = False

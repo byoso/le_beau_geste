@@ -2,12 +2,12 @@ import os
 
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GObject
+from gi.repository import Gtk
 
 # import sys
 
-from data import data
-from helpers.folders_window import FoldersWindow
+from app.data.data import data
+from app.interface.folders_window import FoldersWindow
 # import faulthandler
 
 # faulthandler.dump_traceback(file=sys.stderr, all_threads=True)
@@ -24,13 +24,11 @@ class MainInterface(Gtk.Grid):
         self.set_vexpand(False)
         self.width = 600
 
-
         # Items
         # + collections
         btn_folders = Gtk.Button(label="+ collections", tooltip_text="Manage your collections")
         btn_folders.connect("clicked", self.open_folders_window)
         self.attach(btn_folders, 0, 0, 1, 1)
-
 
         # refresh
         self.btn_refresh = Gtk.Button(label="Refresh", tooltip_text="Refresh the list")
@@ -125,7 +123,6 @@ class MainInterface(Gtk.Grid):
                     self.my_folders.set_active(i)
                     break
         self.show_all()
-
 
     def on_folder_changed(self, combo):
         index = combo.get_active()

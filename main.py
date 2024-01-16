@@ -10,13 +10,14 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 from gi.repository import Gdk, GdkPixbuf
 
-import config
-from helpers.main_interface import MainInterface
-from helpers.utils import get_images
-from data import data
+from app import config
+from app.interface.main_interface import MainInterface
+from app.utils.utils import get_images
+from app.data.data import data
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 
 class MainWindow(Gtk.Window):
     """Basic gtk window"""
@@ -24,7 +25,7 @@ class MainWindow(Gtk.Window):
         # Basic construction
         super().__init__(title=f"le beau geste ({config.VERSION})")
         self.set_size_request(1000, 600)
-        self.set_default_icon_from_file(os.path.join(BASE_DIR, "helpers", "icon_trans_le_beau_geste.png"))
+        self.set_default_icon_from_file(os.path.join(BASE_DIR, "app", "interface", "icon_trans_le_beau_geste.png"))
         self.set_position(Gtk.WindowPosition.CENTER)
         self.current_collection = None
         self.scroll = Gtk.ScrolledWindow()
@@ -47,13 +48,11 @@ class MainWindow(Gtk.Window):
         # connect the quit button of the window
         self.connect("delete-event", Gtk.main_quit)
 
-
         # initialize some values
         self.images = []
         self.image = None
         self.running = False
         self.waiting = None
-
 
         self.image_index = 0
         try:
@@ -193,13 +192,12 @@ if __name__ == "__main__":
 
     # CSS styling
     provider = Gtk.CssProvider()
-    provider.load_from_path(os.path.join(BASE_DIR, "helpers", "style.css"))
+    provider.load_from_path(os.path.join(BASE_DIR, "app", "interface", "style.css"))
     Gtk.StyleContext().add_provider_for_screen(
         Gdk.Screen.get_default(),
         provider,
         Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
         )
-
 
     window = MainWindow()
     window.show_all()

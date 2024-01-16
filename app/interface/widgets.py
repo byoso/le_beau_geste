@@ -1,16 +1,16 @@
 
-import subprocess
 import os
 
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GObject
 
-from data import data
-from helpers.utils import open_folder
+from app.data.data import data
+from app.utils.utils import open_folder
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 
 class IconMenuItem(Gtk.MenuItem):
     """Replaces Gtk.ImageMenuItem which is deprecated"""

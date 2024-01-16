@@ -4,11 +4,12 @@ import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk as gtk
 
-from helpers.widgets import FolderItem, Notification
-from data import data
+from app.interface.widgets import FolderItem, Notification
+from app.data.data import data
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 data = data
+
 
 class FoldersWindow(gtk.Window):
     """Basic gtk window"""
